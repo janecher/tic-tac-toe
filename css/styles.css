@@ -1,0 +1,15 @@
+#board {
+}
+
+td {
+  height: 100px;
+  width: 100px;
+}
+
+.table-row {
+  border-bottom: 3px solid gray;
+}
+
+.table-space {
+  border-right: 3px solid gray;
+}
