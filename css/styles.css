@@ -6,10 +6,34 @@ td {
   width: 100px;
 }
 
+h1 {
+  text-align: center;
+}
+
+.game-conditions {
+  text-align: center;
+}
+
+#sign {
+  width: 100px;
+  margin: auto;
+}
+
+.btn {
+  font-weight: bold;
+}
+
 .table-row {
-  border-bottom: 3px solid gray;
+  border-bottom: 10px solid gray;
 }
 
 .table-space {
-  border-right: 3px solid gray;
+  border-right: 10px solid gray;
+}
+
+.space {
+  content: "X";
+  text-align: center;
+  font-size: 50px; 
+  color: black;
 }
