@@ -9,47 +9,73 @@ function Game (board, player1, player2) {
 //Board
 
 function Board () {
-  this.board = [];
+  this.board = [[],[],[]];
 }
 
-Board.prototype.spaces = function (n) {
-  for(let i = 1; i <= n; i++) {
-    for(let j = 1; j <= n; j++) {
-      this.board.push(new Space(i, j));
-    }
-  }
-}
-
-Board.prototype.find = function (x, y) {
-  for(let i = 0; i < this.board.length; i ++){
-    if(this.board[i].x === x && this.board[i].y === y) {
-      return this.board[i];
+Board.prototype.rowChecker = function(space) {
+  if(sideArrayFull(this.board[space.x], this.board.length)) {
+    if(checkArrayForWin(this.board[space.x])) {
+      return true;
     }
   }
   return false;
 }
 
-/*Board.prototype.win = function() {
-  if(board[0].value === board[1].value === board[2].value || 
-  board[3].value === board[4].value === board[5].value ||
-  board[6].value === board[7].value === board[8].value ||
-  board[0].value === board[3].value === board[5].value ||
-  board[1].value === board[4].value === board[6].value ||
-  board[2].value === board[5].value === board[8].value ||
-  board[0].value === board[4].value === board[8].value ||
-  board[2].value === board[4].value === board[6].value) {
-    return true;
-  } else {
-    return false;
-  }
-}*/
-
-Board.prototype.full = function() {
-  for(let i = 0; i <this.board.length; i++) {
-    if(this.board[i].mark) {
+Board.prototype.columnChecker = function(space) {
+  let columnArray = [];
+  for(let i =0; i< this.board.length; i++) {
+    if(this.board[i][space.y]) {
+      columnArray.push(this.board[i][space.y]);
+    } else {
       return false;
     }
   }
+  return checkArrayForWin(columnArray);
+}
+
+Board.prototype.diagonalChecker = function(space) {
+  let diagonalArray = [];
+  for(let i =0; i< this.board.length; i++) {
+    if(this.board[i][i]) {
+      diagonalArray.push(this.board[i][i]);
+    } else {
+      return false;
+    }
+  }
+  return checkArrayForWin(diagonalArray);
+}
+
+Board.prototype.crossDiagonalChecker = function(space) {
+  let crossDiagonalArray = [];
+  for(let i =0; i< this.board.length; i++) {
+    if(this.board[i][this.board.length - i - 1]) {
+      crossDiagonalArray.push(this.board[i][this.board.length - i - 1]);
+    } else {
+      return false;
+    }
+  }
+  return checkArrayForWin(crossDiagonalArray);
+}
+
+function sideArrayFull(array, size) {
+  if (array.length === size) {
+    for(let i = 0; i < array.length; i++) {
+      if(!array[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+
+function checkArrayForWin(array) {
+  let checker = array[0];
+    for(let i = 1; i < array.length; i++) {
+      if(array[i] !== checker) {
+        return false;
+      }
+    }
   return true;
 }
 
@@ -58,11 +84,9 @@ Board.prototype.full = function() {
 function Space (x, y) {
   this.x = x;
   this.y = y;
-  this.mark = false;
 }
 
 Space.prototype.marked = function(player) {
-  this.mark = true;
   this.value = player.sigh;
 }
 
@@ -77,28 +101,13 @@ function Player (sigh) {
 }
 
 Player.prototype.mark = function() {
-    return this.sigh;
+  return this.sigh;
 }
 
 
 //UI Logic
 
-function win(board) {
-  if(board.board[0].value === board.board[1].value === board.board[2].value || 
-    board.board[3].value === board.board[4].value === board.board[5].value ||
-    board.board[6].value === board.board[7].value === board.board[8].value ||
-    board.board[0].value === board.board[3].value === board.board[5].value ||
-    board.board[1].value === board.board[4].value === board.board[6].value ||
-    board.board[2].value === board.board[5].value === board.board[8].value ||
-    board.board[0].value === board.board[4].value === board.board[8].value ||
-    board.board[2].value === board.board[4].value === board.board[6].value) {
-      return true;
-    } else {
-      return false;
-    }
-}
-
-function playerMove (player1, player2) {
+function playerMove(player1, player2) {
   if (player1.turn) {
     player1.turn = false;
     return player1.mark();
@@ -108,7 +117,7 @@ function playerMove (player1, player2) {
   }
 }
 
-function markSpace (space, player1, player2) {
+function markSpace(space, player1, player2) {
   if (player1.turn) {
     space.marked(player1);
   } else {
@@ -121,16 +130,24 @@ $(document).ready(function() {
   playerX.turn = true;
   let playerO = new Player("O");
   let board = new Board();
-  board.spaces(3);
-  for(let x = 1; x <= 3; x++) {
-    for(let y = 1; y <= 3; y++) {
-      $("#x"+x+"y"+y).click(function(){  
-        if(!board.find(x, y).mark) {
-          markSpace(board.find(x, y), playerX, playerO);
-          $("#x"+x+"y"+y).text(playerMove(playerX, playerO));
-          console.log(board);
+  let stop = false;
+  for(let x = 0; x < 3; x++) {
+    for(let y = 0; y < 3; y++) {
+      let space = new Space(x, y);
+      $("#x"+x+"y"+y).on('click', function(){  
+        //let space = new Space(x, y);
+        markSpace(space, playerX, playerO);
+        board.board[x][y] = space.markedBy();
+        $("#x"+x+"y"+y).text(playerMove(playerX, playerO));
+        if (board.rowChecker(space) || board.columnChecker(space) || board.diagonalChecker(space) || board.crossDiagonalChecker(space)) {
+          alert("Player " + space.markedBy() + " win");
+          stop = true;
         }
-      });
+        $("#x"+x+"y"+y).off('click');
+      }); 
+      if(stop) {
+        $("#x"+x+"y"+y).off('click');
+      }
     }
   }
 });
