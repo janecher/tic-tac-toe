@@ -1,11 +1,5 @@
 //Buisness logic
 
-function Game (board, player1, player2) {
-  this.board = board;
-  this.player1 = player1;
-  this.player2 = player2;
-}
-
 //Board
 
 function Board () {
@@ -33,7 +27,7 @@ Board.prototype.columnChecker = function(space) {
   return checkArrayForWin(columnArray);
 }
 
-Board.prototype.diagonalChecker = function(space) {
+Board.prototype.diagonalChecker = function() {
   let diagonalArray = [];
   for(let i =0; i< this.board.length; i++) {
     if(this.board[i][i]) {
@@ -45,7 +39,7 @@ Board.prototype.diagonalChecker = function(space) {
   return checkArrayForWin(diagonalArray);
 }
 
-Board.prototype.crossDiagonalChecker = function(space) {
+Board.prototype.crossDiagonalChecker = function() {
   let crossDiagonalArray = [];
   for(let i =0; i< this.board.length; i++) {
     if(this.board[i][this.board.length - i - 1]) {
@@ -130,24 +124,28 @@ $(document).ready(function() {
   playerX.turn = true;
   let playerO = new Player("O");
   let board = new Board();
-  let stop = false;
+  let count = 0;
   for(let x = 0; x < 3; x++) {
     for(let y = 0; y < 3; y++) {
       let space = new Space(x, y);
-      $("#x"+x+"y"+y).on('click', function(){  
-        //let space = new Space(x, y);
+      $("#x"+x+"y"+y).on('click', function(){  ;
         markSpace(space, playerX, playerO);
         board.board[x][y] = space.markedBy();
         $("#x"+x+"y"+y).text(playerMove(playerX, playerO));
-        if (board.rowChecker(space) || board.columnChecker(space) || board.diagonalChecker(space) || board.crossDiagonalChecker(space)) {
-          alert("Player " + space.markedBy() + " win");
-          stop = true;
+        count++;
+        if (board.rowChecker(space) || board.columnChecker(space) || board.diagonalChecker() || board.crossDiagonalChecker()) {
+          $("#winner").text(`Player ${space.markedBy()} win!`);
+          $(".game").hide();
+        }
+        if (count === 9) {
+          $("#winner").text(`Winners all around!`);
+          $(".game").hide();
         }
         $("#x"+x+"y"+y).off('click');
       }); 
-      if(stop) {
-        $("#x"+x+"y"+y).off('click');
-      }
     }
   }
+  $("#new-game").click(function(){
+    location.reload();
+  });
 });
